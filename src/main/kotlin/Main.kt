@@ -30,6 +30,7 @@ fun main() {
             MENU_LEARN_WORDS -> println("Учить слова")
             MENU_STATISTICS -> showStatistics(wordList)
             MENU_EXIT -> return
+            else -> println("Неверный ввод")
         }
     }
 }
