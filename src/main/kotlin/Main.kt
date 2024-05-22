@@ -4,5 +4,12 @@ import java.io.File
 
 fun main() {
     val file = File("words.txt")
-    file.readLines().forEach { println(it) }
+    val wordList = emptyList<Word>().toMutableList()
+    file.readLines().forEach {
+        val word = Word.fromString(it)
+        if (word != null)
+            wordList.add(word)
+    }
+
+    wordList.forEach { println(it) }
 }
