@@ -22,21 +22,25 @@ fun List<Word>.getUnlearnedWords(count: Int = VARIANTS_COUNT): List<Word> {
     val allUnlearnedWords = filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }
     val result = allUnlearnedWords.shuffled().take(count)
     if (result.size == count)
-        return  result
+        return result
 
-    return (result + filter { it.answersCount >= REPEATS_COUNT_FOR_LEARN }.shuffled().take(count - result.size)).shuffled()
+    return (result + filter { it.answersCount >= REPEATS_COUNT_FOR_LEARN }
+        .shuffled()
+        .take(count - result.size)
+            ).shuffled()
 }
 
 fun learnOneWord(words: List<Word>) {
     val allUnlearnedWords = words.filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }
-    if (allUnlearnedWords.isEmpty()){
+    if (allUnlearnedWords.isEmpty()) {
         println("Вы выучили все слова")
         return
     }
     val variants = words.getUnlearnedWords()
-    val wordToLearn = variants.filter {  it.answersCount < REPEATS_COUNT_FOR_LEARN  } .random()
+    val wordToLearn = variants.filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }.random()
     println(wordToLearn.original)
-    println(variants.mapIndexed { index, word ->  "${index + 1}.${word.translate}" }.joinToString(" "))
+    println(variants.mapIndexed { index, word -> "${index + 1}.${word.translate}" }
+        .joinToString(" "))
 }
 
 fun main() {
@@ -45,8 +49,6 @@ fun main() {
     file.readLines().forEach {
         Word.fromString(it)?.let { wordList.add(it) }
     }
-
-    wordList.forEach { println(it) }
 
     while (true) {
         showMenu()
