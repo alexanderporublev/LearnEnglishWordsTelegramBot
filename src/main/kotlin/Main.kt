@@ -32,7 +32,7 @@ fun List<Word>.getUnlearnedWords(count: Int = VARIANTS_COUNT): List<Word> {
             ).shuffled()
 }
 
-fun learnOneWord(words: MutableList<Word>): Boolean {
+fun learnOneWord(words: List<Word>): Boolean {
     val allUnlearnedWords = words.filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }
     if (allUnlearnedWords.isEmpty()) {
         println("Вы выучили все слова")
@@ -51,7 +51,7 @@ fun learnOneWord(words: MutableList<Word>): Boolean {
             "0" -> return false
             rightAnswer -> {
                 println("Вы дали верный ответ")
-                words.forEach { if (it.original == wordToLearn.original) it.answersCount++ }
+                wordToLearn.answersCount++
                 storeAnswer(words)
                 return true
             }
@@ -64,11 +64,9 @@ fun learnOneWord(words: MutableList<Word>): Boolean {
 
 fun storeAnswer(words: List<Word>) {
     val file = File(FILE_NAME)
-    file.delete()
-    file.createNewFile()
-    words.forEach {
-        file.appendText("${it.toString(SEPARATOR)}\n")
-    }
+
+        file.writeText(words.map{ it.toString(SEPARATOR) }.joinToString("\n"))
+
 }
 
 fun main() {
