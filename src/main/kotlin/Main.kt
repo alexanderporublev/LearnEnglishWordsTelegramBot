@@ -64,9 +64,11 @@ fun learnOneWord(words: List<Word>): Boolean {
 
 fun storeAnswer(words: List<Word>) {
     val file = File(FILE_NAME)
-
-        file.writeText(words.map{ it.toString(SEPARATOR) }.joinToString("\n"))
-
+    file.delete()
+    file.createNewFile()
+    words.forEach {
+        file.appendText("${it.toString(SEPARATOR)}\n")
+    }
 }
 
 fun main() {
