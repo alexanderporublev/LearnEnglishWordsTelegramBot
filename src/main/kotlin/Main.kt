@@ -7,6 +7,8 @@ const val MENU_STATISTICS = "2"
 const val MENU_EXIT = "0"
 const val REPEATS_COUNT_FOR_LEARN = 3
 const val VARIANTS_COUNT = 4
+const val FILE_NAME="words.txt"
+const val SEPARATOR="|"
 
 fun showMenu() = println("Меню: $MENU_LEARN_WORDS – Учить слова, $MENU_STATISTICS – Статистика, $MENU_EXIT – Выход")
 
@@ -30,23 +32,48 @@ fun List<Word>.getUnlearnedWords(count: Int = VARIANTS_COUNT): List<Word> {
             ).shuffled()
 }
 
-fun learnOneWord(words: List<Word>) {
+fun learnOneWord(words: List<Word>): Boolean {
     val allUnlearnedWords = words.filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }
     if (allUnlearnedWords.isEmpty()) {
         println("Вы выучили все слова")
-        return
+        return false
     }
     val variants = words.getUnlearnedWords()
     val wordToLearn = variants.filter { it.answersCount < REPEATS_COUNT_FOR_LEARN }.random()
     println(wordToLearn.original)
     println(variants.mapIndexed { index, word -> "${index + 1}.${word.translate}" }
-        .joinToString(" "))
+        .joinToString(separator = " ", postfix = " 0.В главное меню"))
+
+    val rightAnswer = (variants.indexOf(wordToLearn) + 1).toString()
+
+    print("Ваш ответ: ")
+        when(readln()) {
+            "0" -> return false
+            rightAnswer -> {
+                println("Вы дали верный ответ")
+                wordToLearn.answersCount++
+                storeAnswer(words)
+                return true
+            }
+            else -> {
+                println("К сожалению, это неправильный ответ.")
+                return false
+            }
+        }
+}
+
+fun storeAnswer(words: List<Word>) {
+    val file = File(FILE_NAME)
+    file. writeText("")
+    words.forEach {
+        file.appendText("${it.toString(SEPARATOR)}\n")
+    }
 }
 
 fun main() {
-    val file = File("words.txt")
+    val file = File(FILE_NAME)
     val wordList = mutableListOf<Word>()
-    file.readLines().forEach {
+    file.forEachLine {
         Word.fromString(it)?.let { wordList.add(it) }
     }
 
