@@ -3,8 +3,6 @@ package org.example
 const val MENU_LEARN_WORDS = "1"
 const val MENU_STATISTICS = "2"
 const val MENU_EXIT = "0"
-const val REPEATS_COUNT_FOR_LEARN = 3
-const val VARIANTS_COUNT = 4
 const val FILE_NAME = "words.txt"
 const val SEPARATOR = "|"
 
