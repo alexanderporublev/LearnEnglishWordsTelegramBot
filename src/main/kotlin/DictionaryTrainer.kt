@@ -7,7 +7,8 @@ data class Statistics(
     val total: Int,
     val percent: Double,
 ) {
-    fun print() = println("Выучено $learned из ${total} слов | ${"%.2f".format(percent)}%")
+    fun asString() = "Выучено $learned из ${total} слов | ${"%.2f".format(percent)}%"
+    fun print() = println(asString())
 }
 
 data class Question(
@@ -21,12 +22,16 @@ class DictionaryTrainer(
 ) {
     val dictionary = mutableListOf<Word>()
 
+    private var currentQuestion: Question? = null
+
     fun loadDictionary() {
         val file = File(FILE_NAME)
         file.forEachLine {
             Word.fromString(it)?.let { dictionary.add(it) }
         }
     }
+
+    fun getCurrentQuestion(): Question? = currentQuestion
 
     fun storeDictionary() {
         val file = File(FILE_NAME)
@@ -46,11 +51,14 @@ class DictionaryTrainer(
         val allUnlearnedWords = dictionary.filter { it.answersCount < repeatsCountForLearn }
         if (allUnlearnedWords.isEmpty()) {
             println("Вы выучили все слова")
-            return null
+            currentQuestion = null
         }
-        val variants = getUnlearnedWords(variantsCount)
-        val wordToLearn = variants.filter { it.answersCount < repeatsCountForLearn }.random()
-        return Question(variants, wordToLearn)
+        else {
+            val variants = getUnlearnedWords(variantsCount)
+            val wordToLearn = variants.filter { it.answersCount < repeatsCountForLearn }.random()
+            currentQuestion = Question(variants, wordToLearn)
+        }
+        return currentQuestion
     }
 
     fun checkAnswerForQuestion(question: Question, answer: Int): Boolean {
