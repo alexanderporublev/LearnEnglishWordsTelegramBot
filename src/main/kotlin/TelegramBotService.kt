@@ -1,6 +1,7 @@
 package org.example
 
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -21,7 +22,7 @@ class TelegramBotService(
 
 
     fun sendMessage(chatId: String, message: String): String =
-        request("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$message")
+        request("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=${URLEncoder.encode(message, "UTF-8")}")
 
     fun sendMenu(chatId: String): String {
         val url = "https://api.telegram.org/bot$botToken/sendMessage"

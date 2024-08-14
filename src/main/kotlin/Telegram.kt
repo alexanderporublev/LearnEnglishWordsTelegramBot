@@ -18,15 +18,15 @@ fun getCallbackData(updates: String): String? {
     return matchTextResult?.groups?.get(1)?.value
 }
 
-fun getLastUpdateId(updates: String): Int {
-    val updateTextRegex: Regex = "\"update_id\":\"(.+?)\"".toRegex()
+fun getLastUpdateId(updates: String): Int? {
+    val updateTextRegex: Regex = "\"update_id\":(.+?),".toRegex()
     val matchTextResult: MatchResult? = updateTextRegex.find(updates)
     val updateStr = matchTextResult?.groups?.get(1)?.value
     println(updateStr)
     if (updateStr != null)
         return  updateStr.toInt() + 1
     else
-        return 0
+        return null
 }
 
 
@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
             Thread.sleep(2000)
             val updates: String = botService.getUpdates(updateId)
             println(updates)
-            updateId = getLastUpdateId(updates)
+            updateId = getLastUpdateId(updates)?:continue
             when (state) {
                 ChatState.INIT -> {
                     chatId = getChatsWhichSentCommand(updates, "menu")
@@ -82,6 +82,7 @@ fun main(args: Array<String>) {
                 }
             }
         } catch (e: Exception) {
+            println(e.stackTraceToString())
             continue
         }
     }
