@@ -20,6 +20,7 @@ class DictionaryTrainer(
     val repeatsCountForLearn: Int = 3,
     val variantsCount: Int = 4,
 ) {
+
     val dictionary = mutableListOf<Word>()
 
     private var currentQuestion: Question? = null
@@ -52,8 +53,7 @@ class DictionaryTrainer(
         if (allUnlearnedWords.isEmpty()) {
             println("Вы выучили все слова")
             currentQuestion = null
-        }
-        else {
+        } else {
             val variants = getUnlearnedWords(variantsCount)
             val wordToLearn = variants.filter { it.answersCount < repeatsCountForLearn }.random()
             currentQuestion = Question(variants, wordToLearn)

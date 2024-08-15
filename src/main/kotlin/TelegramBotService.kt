@@ -22,7 +22,14 @@ class TelegramBotService(
 
 
     fun sendMessage(chatId: String, message: String): String =
-        request("https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=${URLEncoder.encode(message, "UTF-8")}")
+        request(
+            "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=${
+                URLEncoder.encode(
+                    message,
+                    "UTF-8"
+                )
+            }"
+        )
 
     fun sendMenu(chatId: String): String {
         val url = "https://api.telegram.org/bot$botToken/sendMessage"
@@ -62,27 +69,25 @@ class TelegramBotService(
 
     fun sendQuestion(chatId: String, question: Question): String {
         val url = "https://api.telegram.org/bot$botToken/sendMessage"
-        val wordListJsonObjectList = question.variants.shuffled().map {
+        val wordListJsonObjectList = question.variants.mapIndexed { index: Int, it: Word ->
             """
                 {
-                    "text": ${it.translate},
-                    "callback_data": "ANSWER_${it.translate}"
+                    "text": "${it.translate}",
+                    "callback_data": "ANSWER_$index"
                 }
             """.trimIndent()
         }
         val sendQuestionBody = """
             {
                 "chat_id": $chatId,
-                "text": ${question.correctAnswer.original},
+                "text": "${question.correctAnswer.original}",
                 "reply_markup": {
                     "inline_keyboard": [
                         [
                             ${wordListJsonObjectList[0]},
                             ${wordListJsonObjectList[1]},
-                        ],
-                        [
                             ${wordListJsonObjectList[2]},
-                            ${wordListJsonObjectList[3]},
+                            ${wordListJsonObjectList[3]}
                         ]
                     ]
                 }

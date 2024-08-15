@@ -1,6 +1,8 @@
 package org.example
 
-enum class ChatState {INIT, MENU, QUESTION}
+
+enum class ChatState { INIT, MENU, QUESTION }
+
 fun getChatsWhichSentCommand(updates: String, command: String): String? {
     val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
     val matchTextResult: MatchResult? = messageTextRegex.find(updates)
@@ -13,7 +15,7 @@ fun getChatsWhichSentCommand(updates: String, command: String): String? {
 }
 
 fun getCallbackData(updates: String): String? {
-    val callbackTextRegex: Regex = "\"callback_data\":\"(.+?)\"".toRegex()
+    val callbackTextRegex: Regex = "\"data\":\"(.+?)\"".toRegex()
     val matchTextResult: MatchResult? = callbackTextRegex.find(updates)
     return matchTextResult?.groups?.get(1)?.value
 }
@@ -24,18 +26,16 @@ fun getLastUpdateId(updates: String): Int? {
     val updateStr = matchTextResult?.groups?.get(1)?.value
     println(updateStr)
     if (updateStr != null)
-        return  updateStr.toInt() + 1
+        return updateStr.toInt() + 1
     else
         return null
 }
-
 
 fun checkNextQuestionAndSend(trainer: DictionaryTrainer, botService: TelegramBotService, chatId: String) {
     val question = trainer.getNextQuestion()
     if (question != null) {
         botService.sendQuestion(chatId, question)
-    }
-    else {
+    } else {
         botService.sendMessage(chatId, "Вы выучили все слова")
     }
 }
@@ -46,13 +46,14 @@ fun main(args: Array<String>) {
     val botService = TelegramBotService(botToken)
     var state = ChatState.INIT
     val dictionaryTrainer = DictionaryTrainer()
+    dictionaryTrainer.loadDictionary()
     var chatId: String? = null
     while (true) {
         try {
             Thread.sleep(2000)
             val updates: String = botService.getUpdates(updateId)
             println(updates)
-            updateId = getLastUpdateId(updates)?:continue
+            updateId = getLastUpdateId(updates) ?: continue
             when (state) {
                 ChatState.INIT -> {
                     chatId = getChatsWhichSentCommand(updates, "menu")
@@ -61,24 +62,43 @@ fun main(args: Array<String>) {
                     }
                     state = ChatState.MENU
                 }
+
                 ChatState.MENU -> {
                     val callbackResult = getCallbackData(updates)
                     when (callbackResult) {
                         "LEARN_WORD_BUTTON_CLICKED" -> {
-                            if (chatId != null){
+                            if (chatId != null) {
                                 checkNextQuestionAndSend(dictionaryTrainer, botService, chatId)
+                                state = ChatState.QUESTION
                             }
                         }
+
                         "STATISTICS_BUTTON_CLICKED" -> {
                             if (chatId != null) {
                                 botService.sendMessage(chatId, dictionaryTrainer.getStatistics().asString())
                                 botService.sendMenu(chatId)
                             }
                         }
+
+                        "EXIT_BUTTON_CLICKED" -> {
+                            state = ChatState.INIT
+                        }
                     }
                 }
+
                 ChatState.QUESTION -> {
 
+                    val answer = (getCallbackData(updates) ?: "").substringAfter("ANSWER_").toInt()
+                    val currentQuestion = dictionaryTrainer.getCurrentQuestion()
+
+                    if (chatId != null && currentQuestion != null) {
+                        if (dictionaryTrainer.checkAnswerForQuestion(currentQuestion, answer))
+                            botService.sendMessage(chatId, "Это верный ответ")
+                        else
+                            botService.sendMessage(chatId, "К сожалению это неверный ответ")
+                        botService.sendMenu(chatId)
+                        state = ChatState.MENU
+                    }
                 }
             }
         } catch (e: Exception) {
